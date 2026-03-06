@@ -1,0 +1,54 @@
+CREATE TABLE categories (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    category_name VARCHAR(100) NOT NULL UNIQUE
+);
+
+CREATE TABLE suppliers (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    name VARCHAR(150) NOT NULL,
+    phone VARCHAR(20),
+    address VARCHAR(255)
+);
+
+CREATE TABLE users (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    username VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE medicines (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    name VARCHAR(150) NOT NULL,
+    barcode VARCHAR(150) NOT NULL UNIQUE,
+    price DECIMAL(10,2) NOT NULL,
+    stock_quantity INT NOT NULL DEFAULT 0,
+    expiry_date DATE,
+    category_id INT,
+    supplier_id INT,
+
+    CONSTRAINT FK_medicine_category
+    FOREIGN KEY (category_id)
+    REFERENCES categories(id),
+
+    CONSTRAINT FK_medicine_supplier
+    FOREIGN KEY (supplier_id)
+    REFERENCES suppliers(id)
+);
+
+CREATE TABLE stock_transactions (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    medicine_id INT NOT NULL,
+    user_id INT NOT NULL,
+    type VARCHAR(10) CHECK (type IN ('in','out')),
+    quantity INT NOT NULL,
+    transaction_date DATETIME DEFAULT GETDATE(),
+
+    CONSTRAINT FK_transaction_medicine
+    FOREIGN KEY (medicine_id)
+    REFERENCES medicines(id),
+
+    CONSTRAINT FK_transaction_user
+    FOREIGN KEY (user_id)
+    REFERENCES users(id)
+);
