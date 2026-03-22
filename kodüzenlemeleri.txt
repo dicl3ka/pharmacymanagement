@@ -1,0 +1,398 @@
+1: MODEL package içinde medicine classı güncellendi; 
+package org.pharmacy.model;
+
+import java.sql.Date;
+
+public class Medicine {
+    private int id;
+    private String name;
+    private String barcode;
+    private double price;
+    private int stockQuantity;
+    private int minimumStockLevel; //  YENİ EKLENEN ALAN
+    private Date expiryDate;
+    private int categoryId;
+    private int supplierId;
+
+    public Medicine(){
+    }
+
+    public Medicine(int id, String name, String barcode, double price,
+                    int stockQuantity, int minimumStockLevel,
+                    Date expiryDate, int categoryId, int supplierId){
+        this.id = id;
+        this.name = name;
+        this.barcode = barcode;
+        this.price = price;
+        this.stockQuantity = stockQuantity;
+        this.minimumStockLevel = minimumStockLevel; // constructor içine eklendi
+        this.expiryDate = expiryDate;
+        this.categoryId = categoryId;
+        this.supplierId = supplierId;
+    }
+
+    public int getId(){
+        return id;
+    }
+
+    public void setId(int id){
+        this.id = id;
+    }
+
+    public String getName(){
+        return name;
+    }
+
+    public void setName(String name){
+        this.name = name;
+    }
+
+    public String getBarcode(){
+        return barcode;
+    }
+
+    public void setBarcode(String barcode){
+        this.barcode = barcode;
+    }
+
+    public double getPrice(){
+        return price;
+    }
+
+    public void setPrice(double price){
+        this.price = price;
+    }
+
+    public int getStockQuantity(){
+        return stockQuantity;
+    }
+
+    public void setStockQuantity(int stockQuantity){
+        this.stockQuantity = stockQuantity;
+    }
+
+    //  YENİ GETTER
+    public int getMinimumStockLevel(){
+        return minimumStockLevel;
+    }
+
+    // YENİ SETTER
+    public void setMinimumStockLevel(int minimumStockLevel){
+        this.minimumStockLevel = minimumStockLevel;
+    }
+
+    public Date getExpiryDate(){
+        return expiryDate;
+    }
+
+    public void setExpiryDate(Date expiryDate){
+        this.expiryDate = expiryDate;
+    }
+
+    public int getCategoryId(){
+        return categoryId;
+    }
+
+    public void setCategoryId(int categoryId){
+        this.categoryId = categoryId;
+    }
+
+    public int getSupplierId(){
+        return supplierId;
+    }
+
+    public void setSupplierId(int supplierId){
+        this.supplierId = supplierId;
+    }
+}
+
+
+2: medicine builder güncellendi; package org.pharmacy.model;
+
+import java.sql.Date;
+
+public class MedicineBuilder {
+    private int id;
+    private String name;
+    private String barcode;
+    private double price;
+    private int stockQuantity;
+    private int minimumStockLevel;
+    private Date expiryDate;
+    private int categoryId;
+    private int supplierId;
+
+    public MedicineBuilder setId(int id){
+        this.id = id;
+        return this;
+    }
+
+    public MedicineBuilder setName(String name){
+        this.name = name;
+        return this;
+    }
+
+    public MedicineBuilder setBarcode(String barcode){
+        this.barcode = barcode;
+        return this;
+    }
+
+    public MedicineBuilder setPrice(double price){
+        this.price = price;
+        return this;
+    }
+
+    public MedicineBuilder setStockQuantity(int stockQuantity){
+        this.stockQuantity = stockQuantity;
+        return this;
+    }
+
+    public MedicineBuilder setMinimumStockLevel(int minimumStockLevel){
+        this.minimumStockLevel = minimumStockLevel;
+        return this;
+    }
+
+    public MedicineBuilder setExpiryDate(Date expiryDate){
+        this.expiryDate = expiryDate;
+        return this;
+    }
+
+    public MedicineBuilder setCategoryId(int categoryId){
+        this.categoryId = categoryId;
+        return this;
+    }
+
+    public MedicineBuilder setSupplierId(int supplierId){
+        this.supplierId = supplierId;
+        return this;
+    }
+
+    public Medicine build(){
+        if(name == null || name.isBlank()){
+            throw new IllegalStateException("Medicine name is required.");
+        }
+
+        if(barcode == null || barcode.isBlank()){
+            throw new IllegalStateException("Barcode is required.");
+        }
+
+        if(price < 0){
+            throw new IllegalStateException("Price cannot be negative.");
+        }
+
+        if(stockQuantity < 0){
+            throw new IllegalStateException("Stock quantity cannot be negative.");
+        }
+
+        if(minimumStockLevel < 0){
+            throw new IllegalStateException("Minimum stock level cannot be negative.");
+        }
+
+        Medicine medicine = new Medicine();
+        medicine.setId(id);
+        medicine.setName(name);
+        medicine.setBarcode(barcode);
+        medicine.setPrice(price);
+        medicine.setStockQuantity(stockQuantity);
+        medicine.setMinimumStockLevel(minimumStockLevel);
+        medicine.setExpiryDate(expiryDate);
+        medicine.setCategoryId(categoryId);
+        medicine.setSupplierId(supplierId);
+
+        return medicine;
+    }
+}
+
+
+3: inventory service güncellendi;
+package org.pharmacy.service;
+
+import org.pharmacy.dao.MedicineDao;
+import org.pharmacy.model.Medicine;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class InventoryService {
+
+    private MedicineDao medicineDao;
+
+    public InventoryService() {
+        medicineDao = new MedicineDao();
+    }
+
+    // Yeni ilaç ekleme
+    public void addMedicine(Medicine medicine) {
+        medicineDao.addMedicine(medicine);
+    }
+
+    // Tüm ilaçları listeleme
+    public List<Medicine> listMedicines() {
+        return medicineDao.getAllMedicines();
+    }
+
+    // Stok güncelleme
+    public void updateStock(int id, int newStock) {
+        medicineDao.updateMedicineStock(id, newStock);
+    }
+
+    // İlaç silme
+    public void deleteMedicine(int id) {
+        medicineDao.deleteMedicine(id);
+    }
+
+    // Bir ilacın low stock olup olmadığını kontrol eder
+    public boolean isLowStock(Medicine medicine) {
+        return medicine.getStockQuantity() <= medicine.getMinimumStockLevel();
+    }
+
+    // Low stock olan ilaçları döndürür
+    public List<Medicine> getLowStockMedicines() {
+        List<Medicine> allMedicines = medicineDao.getAllMedicines();
+        List<Medicine> lowStockMedicines = new ArrayList<>();
+
+        for (Medicine medicine : allMedicines) {
+            if (isLowStock(medicine)) {
+                lowStockMedicines.add(medicine);
+            }
+        }
+
+        return lowStockMedicines;
+    }
+}
+
+
+4: medicineDao güncellendi;
+
+package org.pharmacy.dao;
+
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.pharmacy.dbconnection.DBConnection;
+import org.pharmacy.model.Medicine;
+
+public class MedicineDao {
+
+    public void addMedicine(Medicine med) {
+
+        String sql = "INSERT INTO medicines(name, barcode, price, stock_quantity, minimum_stock_level, expiry_date, category_id, supplier_id) VALUES (?,?,?,?,?,?,?,?)";
+
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setString(1, med.getName());
+            statement.setString(2, med.getBarcode());
+            statement.setDouble(3, med.getPrice());
+            statement.setInt(4, med.getStockQuantity());
+            statement.setInt(5, med.getMinimumStockLevel());
+            statement.setDate(6, med.getExpiryDate());
+            statement.setInt(7, med.getCategoryId());
+            statement.setInt(8, med.getSupplierId());
+
+            int rowsInserted = statement.executeUpdate();
+
+            if (rowsInserted > 0) {
+                System.out.println("Medicine added successfully!");
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error while adding medicine!");
+            e.printStackTrace();
+        }
+    }
+
+    public List<Medicine> getAllMedicines() {
+
+        List<Medicine> medicines = new ArrayList<>();
+        String sql = "SELECT * FROM medicines";
+
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet resultSet = statement.executeQuery()) {
+
+            while (resultSet.next()) {
+                Medicine medicine = new Medicine();
+
+                medicine.setId(resultSet.getInt("id"));
+                medicine.setName(resultSet.getString("name"));
+                medicine.setBarcode(resultSet.getString("barcode"));
+                medicine.setPrice(resultSet.getDouble("price"));
+                medicine.setStockQuantity(resultSet.getInt("stock_quantity"));
+                medicine.setMinimumStockLevel(resultSet.getInt("minimum_stock_level"));
+                medicine.setExpiryDate(resultSet.getDate("expiry_date"));
+                medicine.setCategoryId(resultSet.getInt("category_id"));
+                medicine.setSupplierId(resultSet.getInt("supplier_id"));
+
+                medicines.add(medicine);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return medicines;
+    }
+
+    public void deleteMedicine(int id) {
+
+        String sql = "DELETE FROM medicines WHERE id=?";
+
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, id);
+
+            int rowsDeleted = statement.executeUpdate();
+
+            if (rowsDeleted > 0) {
+                System.out.println("Medicine deleted successfully.");
+            } else {
+                System.out.println("No medicine found.");
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error while deleting medicine.");
+            e.printStackTrace();
+        }
+    }
+
+    public void updateMedicineStock(int id, int newStock) {
+
+        String sql = "UPDATE medicines SET stock_quantity = ? WHERE id = ?";
+
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, newStock);
+            statement.setInt(2, id);
+
+            int rowsUpdated = statement.executeUpdate();
+
+            if (rowsUpdated > 0) {
+                System.out.println("Medicine stock updated.");
+            } else {
+                System.out.println("No medicine found.");
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error while updating.");
+            e.printStackTrace();
+        }
+    }
+}
+
+
+
+database içinden tabloya güncelleme;
+
+USE Pharmacy;
+GO
+
+ALTER TABLE medicines
+ADD minimum_stock_level INT NOT NULL DEFAULT 10;
