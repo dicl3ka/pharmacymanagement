@@ -1,0 +1,58 @@
+package org.pharmacy.ui;
+
+import org.pharmacy.model.User;
+
+import javax.swing.*;
+import java.awt.*;
+
+public class UserMainMenuFrame extends JFrame {
+
+    private User currentUser;
+    private JTextArea txtOutput;
+
+    public UserMainMenuFrame(User user) {
+        this.currentUser = user;
+
+        setTitle("User Main Menu");
+        setSize(500, 350);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+
+        JLabel lblWelcome = new JLabel("Welcome User: " + currentUser.getUsername());
+        lblWelcome.setFont(new Font("Arial", Font.BOLD, 16));
+
+        JButton btnViewMedicines = new JButton("View Medicines");
+        JButton btnStockTransactions = new JButton("Stock Transactions");
+        JButton btnLogout = new JButton("Logout");
+
+        txtOutput = new JTextArea(10, 35);
+        txtOutput.setEditable(false);
+
+        JPanel topPanel = new JPanel();
+        topPanel.add(lblWelcome);
+
+        JPanel centerPanel = new JPanel(new GridLayout(3, 1, 10, 10));
+        centerPanel.setBorder(BorderFactory.createTitledBorder("User Operations"));
+        centerPanel.add(btnViewMedicines);
+        centerPanel.add(btnStockTransactions);
+        centerPanel.add(btnLogout);
+
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.setBorder(BorderFactory.createTitledBorder("Output"));
+        bottomPanel.add(new JScrollPane(txtOutput));
+
+        setLayout(new BorderLayout());
+        add(topPanel, BorderLayout.NORTH);
+        add(centerPanel, BorderLayout.CENTER);
+        add(bottomPanel, BorderLayout.SOUTH);
+
+        btnViewMedicines.addActionListener(e -> txtOutput.append("View Medicines clicked.\n"));
+        btnStockTransactions.addActionListener(e -> txtOutput.append("Stock Transactions clicked.\n"));
+        btnLogout.addActionListener(e -> logout());
+    }
+
+    private void logout() {
+        dispose();
+        new LoginFrame().setVisible(true);
+    }
+}
