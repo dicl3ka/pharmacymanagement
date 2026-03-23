@@ -1,0 +1,94 @@
+package org.pharmacy.ui;
+
+import org.pharmacy.model.User;
+import org.pharmacy.service.AuthService;
+
+import javax.swing.*;
+import java.awt.*;
+
+public class LoginFrame extends JFrame {
+
+    private JTextField txtUsername;
+    private JPasswordField txtPassword;
+    private JTextArea txtOutput;
+
+    private AuthService authService;
+
+    public LoginFrame() {
+        setTitle("Pharmacy Login");
+        setSize(400, 300);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+
+        authService = new AuthService();
+
+        // Input alanları
+        txtUsername = new JTextField(15);
+        txtPassword = new JPasswordField(15);
+
+        JButton btnLogin = new JButton("Login");
+
+        txtOutput = new JTextArea(5, 30);
+        txtOutput.setEditable(false);
+
+        // Üst panel (form)
+        JPanel panelTop = new JPanel(new GridLayout(2, 2, 5, 5));
+        panelTop.setBorder(BorderFactory.createTitledBorder("Login"));
+
+        panelTop.add(new JLabel("Username:"));
+        panelTop.add(txtUsername);
+
+        panelTop.add(new JLabel("Password:"));
+        panelTop.add(txtPassword);
+
+        // Orta panel (buton)
+        JPanel panelMiddle = new JPanel();
+        panelMiddle.add(btnLogin);
+
+        // Alt panel (output)
+        JPanel panelBottom = new JPanel();
+        panelBottom.setBorder(BorderFactory.createTitledBorder("Output"));
+        panelBottom.add(new JScrollPane(txtOutput));
+
+        // Layout
+        setLayout(new BorderLayout());
+        add(panelTop, BorderLayout.NORTH);
+        add(panelMiddle, BorderLayout.CENTER);
+        add(panelBottom, BorderLayout.SOUTH);
+
+        // Buton action
+        btnLogin.addActionListener(e -> login());
+
+        txtOutput.append("Welcome! Please login.\n");
+    }
+
+    private void login() {
+
+        String username = txtUsername.getText().trim();
+        String password = new String(txtPassword.getPassword()).trim();
+
+        if (username.isEmpty() || password.isEmpty()) {
+            txtOutput.append("[ERROR] Username and password required.\n");
+            return;
+        }
+
+        User user = authService.login(username, password);
+
+        if (user != null) {
+            txtOutput.append("[OK] Login successful: " + user.getUsername() + "\n");
+
+            dispose(); // login ekranını kapat
+
+            if (user.getRole().equalsIgnoreCase("admin")) {
+                new AdminMainMenuFrame(user).setVisible(true);
+            } else if (user.getRole().equalsIgnoreCase("user")) {
+                new UserMainMenuFrame(user).setVisible(true);
+            } else {
+                JOptionPane.showMessageDialog(this, "Unknown role: " + user.getRole());
+            }
+
+        } else {
+            txtOutput.append("[ERROR] Invalid username or password.\n");
+        }
+    }
+}
